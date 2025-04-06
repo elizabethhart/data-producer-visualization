@@ -1,12 +1,17 @@
 import { useEffect, useState } from "react";
+import LineChart from "./LineChart";
+import { Datum } from "./Producer.types";
 
-type Datum = {
-  timestamp: string;
-  value: number;
-};
-
-function Producer({ id }: { id: number }) {
-  const [data, setData] = useState<Datum[]>([]);
+function Producer({
+  id,
+  startDate,
+  endDate,
+}: {
+  id: number;
+  startDate: Date | null;
+  endDate: Date | null;
+}) {
+  const [bufferedData, setBufferedData] = useState<Datum[]>([]);
 
   useEffect(() => {
     const socket = new WebSocket(`ws://localhost:8000/producer/${id}`);
@@ -16,8 +21,8 @@ function Producer({ id }: { id: number }) {
     };
 
     socket.onmessage = (event) => {
-      console.log("data received:", event.data);
-      setData((prev) => [...prev, ...event.data]);
+      const newData = JSON.parse(event.data);
+      setBufferedData((prev) => [...prev, ...newData]);
     };
 
     socket.onclose = () => {
@@ -36,7 +41,7 @@ function Producer({ id }: { id: number }) {
   return (
     <div>
       <h2>Data Producer {id}</h2>
-      {/* TODO: Display data */}
+      <LineChart data={bufferedData} startDate={startDate} endDate={endDate} />
     </div>
   );
 }
