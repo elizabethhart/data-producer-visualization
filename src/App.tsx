@@ -3,7 +3,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 import { addMinutes, subMinutes } from "date-fns";
 
-import Producer from "./Producer";
+import Producers from "./Producers";
 
 import "./App.css";
 import { useState } from "react";
@@ -31,9 +31,7 @@ function App() {
         />
       </LocalizationProvider>
 
-      {/* {Array.from({ length: 10 }, (_, i) => i + 1).map((producer) => ( */}
-      <Producer id={1} key={1} startDate={startTime} endDate={endTime} />
-      {/* ))} */}
+      <Producers startDate={startTime} endDate={endTime} />
     </div>
   );
 }

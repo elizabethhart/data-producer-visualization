@@ -12,7 +12,7 @@ import {
   Legend,
 } from "chart.js";
 import { subMinutes, formatISO, addMinutes } from "date-fns";
-import { Datum } from "./Producer.types";
+import { faker } from "@faker-js/faker";
 
 ChartJS.register(
   CategoryScale,
@@ -25,12 +25,14 @@ ChartJS.register(
   Legend
 );
 
+const colors = ["#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0", "#9966FF"];
+
 function LineChart({
   data,
   startDate,
   endDate,
 }: {
-  data: Datum[];
+  data: { x: string; y: number }[][];
   startDate: Date | null;
   endDate: Date | null;
 }) {
@@ -59,18 +61,11 @@ function LineChart({
         },
       }}
       data={{
-        datasets: [
-          {
-            label: "Data",
-            data: data.map((item) => ({
-              x: new Date(item.timestamp).toISOString(),
-              y: item.value,
-            })),
-            borderColor: "rgba(75,192,192,1)",
-            backgroundColor: "rgba(75,192,192,0.2)",
-            fill: true,
-          },
-        ],
+        datasets: data.map((dataset, index) => ({
+          label: `Producer ${index + 1}`,
+          data: dataset,
+          borderColor: colors[index],
+        })),
       }}
     />
   );
