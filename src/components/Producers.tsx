@@ -1,7 +1,13 @@
 import { useEffect, useState, useRef } from "react";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Grid from "@mui/material/Grid";
+import Switch from "@mui/material/Switch";
+import Tooltip from "@mui/material/Tooltip";
 
 import { ChartDatum, Datum } from "../types/Producer.types";
 import LineChart from "./LineChart";
+import RangePicker from "./RangePicker";
+import ProducerSelection from "./ProducerSelection";
 
 const colors = [
   "#c12e34",
@@ -16,17 +22,12 @@ const colors = [
   "#001852",
 ];
 
-function Producers({
-  producers,
-  selectedProducers,
-  startDate,
-  endDate,
-}: {
-  producers: number[];
-  selectedProducers: number[];
-  startDate: Date | null;
-  endDate: Date | null;
-}) {
+function Producers({ producers }: { producers: number[] }) {
+  const [selectedProducers, setSelectedProducers] =
+    useState<number[]>(producers);
+  const [startTime, setStartTime] = useState<Date | null>(null);
+  const [endTime, setEndTime] = useState<Date | null>(null);
+  const [decimationEnabled, setDecimationEnabled] = useState(true);
   const [dataMap, setDataMap] = useState<Map<number, ChartDatum[]>>(new Map());
 
   // manage queued messages in ref to presist producer data and avoid unnecessary re-renders
@@ -110,18 +111,62 @@ function Producers({
   }, []);
 
   return (
-    <div>
-      <h2>Data Producers</h2>
-      <LineChart
-        data={selectedProducers.map((key) => ({
-          label: `Producer ${key}`,
-          data: [...(dataMap.get(key) || [])],
-          borderColor: colors[key - 1],
-        }))}
-        startDate={startDate}
-        endDate={endDate}
-      />
-    </div>
+    <Grid container direction="row" justifyContent="start">
+      <Grid alignSelf="center">
+        <ProducerSelection
+          producers={producers}
+          selectedProducers={selectedProducers}
+          setSelectedProducers={setSelectedProducers}
+        />
+      </Grid>
+      <Grid container gap={2} direction="column">
+        <Grid>
+          <Grid container gap={2} direction="column">
+            <h2>Data Producers</h2>
+            <LineChart
+              decimationEnabled={decimationEnabled}
+              data={selectedProducers.map((key) => ({
+                label: `Producer ${key}`,
+                data: [...(dataMap.get(key) || [])],
+                borderColor: colors[key - 1],
+              }))}
+              startDate={startTime}
+              // TODO: Investigate why changing endDate causes chart issues
+              endDate={endTime}
+            />
+            <Grid container gap={2} alignSelf="center" marginTop={2}>
+              <Grid alignSelf="center">
+                <RangePicker
+                  startTime={startTime}
+                  setStartTime={setStartTime}
+                  endTime={endTime}
+                  setEndTime={setEndTime}
+                />
+              </Grid>
+              <Grid>
+                {/* TODO: Make data decimation sample size configurable in the UI */}
+                <FormControlLabel
+                  control={
+                    <Switch
+                      defaultChecked
+                      onChange={(e) => setDecimationEnabled(e.target.checked)}
+                    />
+                  }
+                  label={
+                    <Tooltip
+                      title="Enable the 'lttb' algorithm. This reduces the number of data points to show trends in the data."
+                      placement="top"
+                    >
+                      <div>Enable Data Decimation</div>
+                    </Tooltip>
+                  }
+                />
+              </Grid>
+            </Grid>
+          </Grid>
+        </Grid>
+      </Grid>
+    </Grid>
   );
 }
 

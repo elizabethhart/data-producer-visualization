@@ -35,10 +35,12 @@ function LineChart({
   data,
   startDate,
   endDate,
+  decimationEnabled,
 }: {
   data: ChartDataset<"line", ChartDatum[]>[];
   startDate: Date | null;
   endDate: Date | null;
+  decimationEnabled: boolean;
 }) {
   return (
     <Box component="section" sx={{ width: "800px" }}>
@@ -66,12 +68,14 @@ function LineChart({
           responsive: true,
           plugins: {
             // enable decimation to reduce the number of points rendered
-            decimation: {
-              enabled: true,
-              algorithm: "lttb" as DecimationAlgorithm.lttb,
-              samples: 40,
-              threshold: 1000,
-            },
+            ...(decimationEnabled && {
+              decimation: {
+                enabled: true,
+                algorithm: "lttb" as DecimationAlgorithm.lttb,
+                samples: 40,
+                threshold: 1000,
+              },
+            }),
             legend: {
               position: "right",
             },
