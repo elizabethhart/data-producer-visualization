@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from "react";
+
+import { ChartDatum, Datum } from "../types/Producer.types";
 import LineChart from "./LineChart";
-import { ChartDatum, Datum } from "./Producer.types";
 
 function Producers({
   producers,

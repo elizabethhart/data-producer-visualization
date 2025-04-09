@@ -16,7 +16,8 @@ import {
 } from "chart.js";
 import { formatISO } from "date-fns";
 import Box from "@mui/material/Box";
-import { ChartDatum } from "./Producer.types";
+
+import { ChartDatum } from "../types/Producer.types";
 
 ChartJS.register(
   CategoryScale,

@@ -7,14 +7,15 @@ import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFnsV3";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 
-import Producers from "./Producers";
+import Producers from "./components/Producers";
 
 import "./App.css";
+
+const producers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
 function App() {
   const [startTime, setStartTime] = useState<Date | null>(null);
   const [endTime, setEndTime] = useState<Date | null>(null);
-  const producers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
   const [selectedProducers, setSelectedProducers] =
     useState<number[]>(producers);
 
