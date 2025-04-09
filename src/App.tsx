@@ -35,7 +35,7 @@ function App() {
               key={producer}
               control={
                 <Checkbox
-                  checked={producers.includes(producer)}
+                  checked={selectedProducers.includes(producer)}
                   onChange={(e) => handleChange(producer, e.target.checked)}
                   name={producer.toString()}
                 />
