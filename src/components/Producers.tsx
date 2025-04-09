@@ -3,6 +3,19 @@ import { useEffect, useState, useRef } from "react";
 import { ChartDatum, Datum } from "../types/Producer.types";
 import LineChart from "./LineChart";
 
+const colors = [
+  "#c12e34",
+  "#e6b600",
+  "#0098d9",
+  "#2b821d",
+  "#005eaa",
+  "#339ca8",
+  "#d87c7b",
+  "#32a487",
+  "#E690D1",
+  "#001852",
+];
+
 function Producers({
   producers,
   selectedProducers,
@@ -15,6 +28,8 @@ function Producers({
   endDate: Date | null;
 }) {
   const [dataMap, setDataMap] = useState<Map<number, ChartDatum[]>>(new Map());
+
+  // manage queued messages in ref to presist producer data and avoid unnecessary re-renders
   const messageQueues = useRef<Map<number, Datum[]>>(new Map());
 
   const updateDataMap = (id: number) => {
@@ -52,19 +67,17 @@ function Producers({
     ]);
 
     const messageQueue = messageQueues.current.get(id);
-    const existingBufferedData = dataMap.get(id);
 
-    if (existingBufferedData && existingBufferedData.length > 1) {
-      // if there is no data for the id, add it (first message received)
-      updateDataMap(id);
-    } else if (messageQueue && messageQueue.length >= 1000 * 2) {
-      // if the queue at least 2000 messages, add the data to the map
+    // TODO: this decreases re-renders, but causes a lag in the chart animation
+    if (messageQueue && messageQueue.length >= 2000) {
+      // if the queue has at least 2000 messages, add the data to the map
       updateDataMap(id);
     }
 
     // otherwise, do nothing
   };
 
+  // on initial render, create a websocket connection for each producer
   useEffect(() => {
     const sockets = new Map<number, WebSocket>();
 
@@ -73,28 +86,28 @@ function Producers({
       sockets.set(id, socket);
 
       socket.onopen = () => {
-        console.log("connected!");
+        console.log(`connected to producer ${id}!`);
       };
 
       socket.onmessage = (message) => {
-        console.log("message received:");
-
         processMessageData(id, JSON.parse(message.data));
       };
 
       socket.onclose = () => {
-        console.log("connection closed");
+        console.log(`disconnected from producer ${id}!`);
+        // TODO: handle reconnection
       };
 
       socket.onerror = (error) => {
-        console.error("error:", error);
+        console.error(`error from producer ${id}!`, error);
+        // TODO: deduce error type and handle it
       };
     });
 
     return () => {
       sockets.forEach((socket) => socket.close());
     };
-  }, [producers]);
+  }, []);
 
   return (
     <div>
@@ -103,19 +116,7 @@ function Producers({
         data={selectedProducers.map((key) => ({
           label: `Producer ${key}`,
           data: [...(dataMap.get(key) || [])],
-          borderColor: [
-            "#FF6384",
-            "#36A2EB",
-            "#FFCE56",
-            "#4BC0C0",
-            "#9966FF",
-            "#FF9F40",
-            "#FF6384",
-            "#36A2EB",
-            "#FFCE56",
-            "#4BC0C0",
-            "#9966FF",
-          ][key - 1],
+          borderColor: colors[key - 1],
         }))}
         startDate={startDate}
         endDate={endDate}

@@ -1,18 +1,18 @@
 import { Line } from "react-chartjs-2";
 import "chartjs-adapter-date-fns";
 import {
-  Chart as ChartJS,
   CategoryScale,
-  LinearScale,
-  PointElement,
-  TimeScale,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
+  Chart as ChartJS,
+  ChartDataset,
   Decimation,
   DecimationAlgorithm,
-  ChartDataset,
+  Legend,
+  LinearScale,
+  LineElement,
+  PointElement,
+  TimeScale,
+  Title,
+  Tooltip,
 } from "chart.js";
 import { formatISO } from "date-fns";
 import Box from "@mui/material/Box";
@@ -21,14 +21,14 @@ import { ChartDatum } from "../types/Producer.types";
 
 ChartJS.register(
   CategoryScale,
-  LinearScale,
-  TimeScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
+  Decimation,
   Legend,
-  Decimation
+  LinearScale,
+  LineElement,
+  PointElement,
+  TimeScale,
+  Title,
+  Tooltip
 );
 
 function LineChart({
@@ -47,9 +47,9 @@ function LineChart({
           indexAxis: "x",
           parsing: false,
           elements: {
-            point: {
-              radius: 0,
-            },
+            // point: {
+            //   radius: 0,
+            // },
           },
           scales: {
             x: {
@@ -75,6 +75,9 @@ function LineChart({
             legend: {
               position: "right",
             },
+            // TODO: Add custom tooltip for displaying min/max/avg values
+            // tooltip: {
+            // },
           },
         }}
         data={{

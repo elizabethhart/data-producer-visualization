@@ -27,6 +27,16 @@ function App() {
     }
   };
 
+  const validateDate = (date: Date | null) => {
+    const timestamp = date ? Date.parse(date.toString()) : NaN;
+
+    if (isNaN(timestamp)) {
+      return null;
+    }
+
+    return date;
+  };
+
   return (
     <Grid container direction="row" justifyContent="start">
       <Grid alignSelf="center">
@@ -62,14 +72,18 @@ function App() {
                 <TimePicker
                   label="Start"
                   value={startTime}
-                  onChange={(newValue) => setStartTime(newValue)}
+                  onChange={(newValue) => {
+                    setStartTime(validateDate(newValue));
+                  }}
                 />
               </Grid>
               <Grid>
                 <TimePicker
                   label="End"
                   value={endTime}
-                  onChange={(newValue) => setEndTime(newValue)}
+                  onChange={(newValue) => {
+                    setEndTime(validateDate(newValue));
+                  }}
                 />
               </Grid>
             </Grid>
