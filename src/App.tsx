@@ -1,12 +1,13 @@
+import { useState } from "react";
+import { addMinutes, subMinutes } from "date-fns";
+import Grid from "@mui/material/Grid";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFnsV3";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";
-import { addMinutes, subMinutes } from "date-fns";
 
 import Producers from "./Producers";
 
 import "./App.css";
-import { useState } from "react";
 
 function App() {
   const [startTime, setStartTime] = useState<Date | null>(
@@ -19,16 +20,22 @@ function App() {
   return (
     <div>
       <LocalizationProvider dateAdapter={AdapterDateFns}>
-        <TimePicker
-          label="Start"
-          value={startTime}
-          onChange={(newValue) => setStartTime(newValue)}
-        />
-        <TimePicker
-          label="End"
-          value={endTime}
-          onChange={(newValue) => setEndTime(newValue)}
-        />
+        <Grid container spacing={2}>
+          <Grid size={5}>
+            <TimePicker
+              label="Start"
+              value={startTime}
+              onChange={(newValue) => setStartTime(newValue)}
+            />
+          </Grid>
+          <Grid size={5}>
+            <TimePicker
+              label="End"
+              value={endTime}
+              onChange={(newValue) => setEndTime(newValue)}
+            />
+          </Grid>
+        </Grid>
       </LocalizationProvider>
 
       <Producers startDate={startTime} endDate={endTime} />

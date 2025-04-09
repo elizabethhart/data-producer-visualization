@@ -1,6 +1,6 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import LineChart from "./LineChart";
-import { Datum } from "./Producer.types";
+import { ChartDatum, Datum } from "./Producer.types";
 
 function Producers({
   startDate,
@@ -9,10 +9,57 @@ function Producers({
   startDate: Date | null;
   endDate: Date | null;
 }) {
-  const producerIds = useMemo(() => [1, 2, 3, 4, 5], []);
-  const [bufferedDataMap, setBufferedDataMap] = useState<Map<number, Datum[]>>(
-    new Map()
-  );
+  const producerIds = useMemo(() => [1, 2, 3], []);
+  const [dataMap, setDataMap] = useState<Map<number, ChartDatum[]>>(new Map());
+  const messageQueues = useRef<Map<number, Datum[]>>(new Map());
+
+  const updateDataMap = (id: number) => {
+    const messageQueue = messageQueues.current.get(id);
+
+    // map data into the format required by the chart
+    const newData = messageQueue?.map((datum: Datum) => ({
+      x: Date.parse(datum.timestamp),
+      y: datum.value,
+    })) as ChartDatum[];
+
+    // update state with the new data
+    setDataMap((prev) => {
+      const updatedMap = new Map(prev);
+      const existingData = updatedMap.get(id) || [];
+      updatedMap.set(id, [...existingData, ...newData]);
+      return updatedMap;
+    });
+
+    // clear the queue
+    messageQueues.current.delete(id);
+  };
+
+  /**
+   * Accepts a websocket message event for a given producer
+   * If the data is already in the map, it will be added to the existing data
+   * To limit state updates, the dataMap is only updated once it's received a certain amount of data
+   * If the data is not in the map, it will be added as a new entry
+   * @param id
+   */
+  const processMessageData = (id: number, newData: Datum[]) => {
+    messageQueues.current.set(id, [
+      ...(messageQueues.current.get(id) || []),
+      ...newData,
+    ]);
+
+    const messageQueue = messageQueues.current.get(id);
+    const existingBufferedData = dataMap.get(id);
+
+    if (existingBufferedData && existingBufferedData.length > 1) {
+      // if there is no data for the id, add it (first message received)
+      updateDataMap(id);
+    } else if (messageQueue && messageQueue.length >= 1000 * 2) {
+      // if the queue at least 2000 messages, add the data to the map
+      updateDataMap(id);
+    }
+
+    // otherwise, do nothing
+  };
 
   useEffect(() => {
     const sockets = new Map<number, WebSocket>();
@@ -25,15 +72,10 @@ function Producers({
         console.log("connected!");
       };
 
-      socket.onmessage = (event) => {
-        const newData = JSON.parse(event.data);
-        // TODO: add buffer to only update state every few seconds
-        setBufferedDataMap((prev) => {
-          const updatedMap = new Map(prev);
-          const existingData = updatedMap.get(id) || [];
-          updatedMap.set(id, [...existingData, ...newData]);
-          return updatedMap;
-        });
+      socket.onmessage = (message) => {
+        console.log("message received:");
+
+        processMessageData(id, JSON.parse(message.data));
       };
 
       socket.onclose = () => {
@@ -50,18 +92,14 @@ function Producers({
     };
   }, [producerIds]);
 
-  const chartData = producerIds.map((id) => {
-    const data = bufferedDataMap.get(id) || [];
-    return data.map((datum) => ({
-      x: new Date(datum.timestamp).toISOString(),
-      y: datum.value,
-    }));
-  });
-
   return (
     <div>
       <h2>Data Producer 1</h2>
-      <LineChart data={chartData} startDate={startDate} endDate={endDate} />
+      <LineChart
+        data={producerIds.map((id) => dataMap.get(id) || [])}
+        startDate={startDate}
+        endDate={endDate}
+      />
     </div>
   );
 }
