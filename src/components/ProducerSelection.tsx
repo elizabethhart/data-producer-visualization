@@ -9,13 +9,13 @@ function ProducerSelection({
 }: {
   producers: number[];
   selectedProducers: number[];
-  setSelectedProducers: React.Dispatch<React.SetStateAction<number[]>>;
+  setSelectedProducers: (producers: number[]) => void;
 }) {
   const handleChange = (producer: number, checked: boolean) => {
     if (checked) {
-      setSelectedProducers((prev) => [...prev, producer]);
+      setSelectedProducers([...selectedProducers, producer]);
     } else {
-      setSelectedProducers((prev) => prev.filter((p) => p !== producer));
+      setSelectedProducers(selectedProducers.filter((p) => p !== producer));
     }
   };
 

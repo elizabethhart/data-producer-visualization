@@ -7,6 +7,9 @@
 - Vite
 - MaterialUI
 - ChartJS
+- Vitest
+
+GitHub Copilot Chat was also used to debug various issues with integrating with the ChartJS library
 
 # Features
 
@@ -22,6 +25,12 @@ To spin up the application run:
 `npm run dev`
 
 This application assumes an existing backend server running on `localhost:8000`
+
+### Testing
+
+To run the test suite:
+
+`npm run test`
 
 # TODOs
 
