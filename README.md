@@ -15,6 +15,14 @@
 - User can specify time frame in which to view a subset of the given data
 - User can enable/disable data decimation to view data trends
 
+## Local Development
+
+To spin up the application run:
+
+`npm run dev`
+
+This application assumes an existing backend server running on `localhost:8000`
+
 # TODOs
 
 - Handle socket disconnections gracefully and attempt re-connect
