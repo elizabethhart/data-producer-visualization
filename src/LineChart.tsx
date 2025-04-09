@@ -10,8 +10,11 @@ import {
   Title,
   Tooltip,
   Legend,
+  Decimation,
+  DecimationAlgorithm,
+  ChartDataset,
 } from "chart.js";
-import { subMinutes, formatISO, addMinutes } from "date-fns";
+import { formatISO } from "date-fns";
 import Box from "@mui/material/Box";
 import { ChartDatum } from "./Producer.types";
 
@@ -23,29 +26,16 @@ ChartJS.register(
   LineElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
+  Decimation
 );
-
-const colors = [
-  "#FF6384",
-  "#36A2EB",
-  "#FFCE56",
-  "#4BC0C0",
-  "#9966FF",
-  "#FF9F40",
-  "#FF6384",
-  "#36A2EB",
-  "#FFCE56",
-  "#4BC0C0",
-  "#9966FF",
-];
 
 function LineChart({
   data,
   startDate,
   endDate,
 }: {
-  data: ChartDatum[][];
+  data: ChartDataset<"line", ChartDatum[]>[];
   startDate: Date | null;
   endDate: Date | null;
 }) {
@@ -53,26 +43,32 @@ function LineChart({
     <Box component="section" sx={{ width: "800px" }}>
       <Line
         options={{
+          indexAxis: "x",
+          parsing: false,
+          elements: {
+            point: {
+              radius: 0,
+            },
+          },
           scales: {
             x: {
               type: "time",
-              time: {
-                unit: "second",
+              ticks: {
+                source: "auto",
+                autoSkip: true,
+                maxTicksLimit: 5,
               },
-              min: startDate
-                ? formatISO(startDate)
-                : formatISO(subMinutes(Date.now(), 1)),
-              max: endDate
-                ? formatISO(endDate)
-                : formatISO(addMinutes(Date.now(), 1)),
+              ...(startDate && { min: formatISO(startDate) }),
+              ...(endDate && { max: formatISO(endDate) }),
             },
           },
           responsive: true,
           plugins: {
+            // enable decimation to reduce the number of points rendered
             decimation: {
               enabled: true,
-              algorithm: "lttb",
-              samples: 1000,
+              algorithm: "lttb" as DecimationAlgorithm.lttb,
+              samples: 40,
               threshold: 1000,
             },
             legend: {
@@ -81,13 +77,7 @@ function LineChart({
           },
         }}
         data={{
-          datasets: data.map((dataset, index) => ({
-            label: `Producer ${index + 1}`,
-            data: dataset,
-            borderColor: colors[index],
-            parsing: false,
-            indexAxis: "x",
-          })),
+          datasets: data,
         }}
       />
     </Box>

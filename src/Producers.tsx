@@ -1,15 +1,18 @@
-import { useEffect, useState, useRef, useMemo } from "react";
+import { useEffect, useState, useRef } from "react";
 import LineChart from "./LineChart";
 import { ChartDatum, Datum } from "./Producer.types";
 
 function Producers({
+  producers,
+  selectedProducers,
   startDate,
   endDate,
 }: {
+  producers: number[];
+  selectedProducers: number[];
   startDate: Date | null;
   endDate: Date | null;
 }) {
-  const producerIds = useMemo(() => [1, 2, 3], []);
   const [dataMap, setDataMap] = useState<Map<number, ChartDatum[]>>(new Map());
   const messageQueues = useRef<Map<number, Datum[]>>(new Map());
 
@@ -64,7 +67,7 @@ function Producers({
   useEffect(() => {
     const sockets = new Map<number, WebSocket>();
 
-    producerIds.forEach((id) => {
+    producers.forEach((id) => {
       const socket = new WebSocket(`ws://localhost:8000/producer/${id}`);
       sockets.set(id, socket);
 
@@ -90,13 +93,29 @@ function Producers({
     return () => {
       sockets.forEach((socket) => socket.close());
     };
-  }, [producerIds]);
+  }, [producers]);
 
   return (
     <div>
-      <h2>Data Producer 1</h2>
+      <h2>Data Producers</h2>
       <LineChart
-        data={producerIds.map((id) => dataMap.get(id) || [])}
+        data={selectedProducers.map((key) => ({
+          label: `Producer ${key}`,
+          data: [...(dataMap.get(key) || [])],
+          borderColor: [
+            "#FF6384",
+            "#36A2EB",
+            "#FFCE56",
+            "#4BC0C0",
+            "#9966FF",
+            "#FF9F40",
+            "#FF6384",
+            "#36A2EB",
+            "#FFCE56",
+            "#4BC0C0",
+            "#9966FF",
+          ][key - 1],
+        }))}
         startDate={startDate}
         endDate={endDate}
       />
